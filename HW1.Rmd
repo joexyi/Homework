@@ -91,7 +91,7 @@ ggplot(mtcars, aes(wt, mpg)) +
 1.  What do the empty cells in plot with `facet_grid(drv ~ cyl)` mean?
     How do they relate to this plot?
     
-    ```{r eval= false}
+    ```{r eval= FALSE}
     ggplot(data = mpg) + 
       geom_point(mapping = aes(x = drv, y = cyl))
     ```
@@ -168,28 +168,40 @@ ggplot(mtcars, aes(wt, mpg)) +
       geom_smooth(se = FALSE)
     ```
 
-    Answer: There should be one scatter plot with a line graph layered on top. The x axis is the engine displacement in liters, y axis is the highway miles per gallon. The categorization of the wheel drive is colored.
+    Answer: There should be one scatter plot with a line graph layered on top. The x axis is the engine displacement in liters, y axis is the highway miles per gallon. The categorization of the wheel drive is colored. I'm not sure what se = False does but geom_smooth creates a line.
 
     ```{r}
-
+    ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+      geom_point() + 
+      geom_smooth(se = FALSE)
     ```
 
 3.  What does `show.legend = FALSE` do?  What happens if you remove it?  
     Why do you think I used it earlier in the chapter?
 
-    Answer: 
+    Answer: show.legend = FALSE hides the legend for the aesthetic for the non-axis variables (mapped variables). If you remove it, by default, the legend shows for any mapped variables that aren't already labeled by the axises. The earlier plot used it because the 2 plots in that group already told you how the 3 lines are differentiated. If you add a legend, it would just be redundant.
 
     ```{r}
-
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+    show.legend = TRUE
+  )
     ```
 
 4.  What does the `se` argument to `geom_smooth()` do?
 
 
-    Answer: 
+    Answer: se = TRUE displays the confidence interval around the geom_smooth line.
 
     ```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = TRUE)
 
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
     ```
 
 5.  Will these two graphs look different? Why/why not?
@@ -204,7 +216,7 @@ ggplot(mtcars, aes(wt, mpg)) +
       geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
     ```
 
-    Answer: 
+    Answer: They should be the same since the geom_point and geom_smooth will default to the mapping in the ggplot(). Thus it would produce the same plot
 
     ```{r}
 
@@ -218,7 +230,9 @@ ggplot(mtcars, aes(wt, mpg)) +
     Answer: 
     
     ```{r, echo=TRUE, eval=TRUE}
-
+    ggplot() +
+      geom_point(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+      geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy, linetype = drv))
     ```
 
 
@@ -227,7 +241,9 @@ ggplot(mtcars, aes(wt, mpg)) +
     Answer: 
     
     ```{r, echo=TRUE, eval=TRUE}
-
+  ggplot() +
+      geom_point(data = mpg, mapping = aes(x = displ, y = hwy, color = drv, alpha = year)) + 
+      geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy), se = FALSE)
     ```
 
     
@@ -238,7 +254,10 @@ ggplot(mtcars, aes(wt, mpg)) +
     Answer: 
     
     ```{r, echo=TRUE, eval=TRUE}
-
+ ggplot(mpg, aes(x =displ, y = hwy)) + 
+  geom_point(size = 4, color = 'white') +
+  geom_point(aes(color = drv)) +
+  annotate('text', x = 2.6, y = 44, label = 'Max hwy = 44')
     ```
 
 # Exercise 4
@@ -247,27 +266,35 @@ ggplot(mtcars, aes(wt, mpg)) +
     you rewrite the previous plot to use that geom function instead of the 
     stat function?
 
-    Answer: 
+    Answer: The default geom is geom_pointrange.
 
     ```{r}
-
+ggplot(data = diamonds) +
+    geom_pointrange(
+    mapping = aes(x = cut, y = depth), stat = 'summary',
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+    )
     ```
 
 2.  What does `geom_col()` do? How is it different to `geom_bar()`?
 
-    Answer: 
+    Answer: Geom_col makes the heights of the bars to represent values in the data and uses the identity stat. Geom_bar makes the height of the bar proportional to the number of cases in each group. 
 
     ```{r}
-
+?geom_col
     ```
 
 3.  What variables does `stat_smooth()` compute? What parameters control
     its behaviour?
 
-    Answer: 
+    Answer: stat_smooth computes y (predicted value), ymin, ymax, and standard error (same as geom_smooth). It uses the x, y, method, standard error, and formula parameters to calculate a smooth line/curve to fit the data.
 
     ```{r}
+?stat_smooth
 
+    
     ```
 
 # Exercise 5
@@ -279,26 +306,28 @@ ggplot(mtcars, aes(wt, mpg)) +
       geom_point()
     ```
 
-    Answer: 
+    Answer: There is a lot of overplotting due to data consisting of cars with the same cty and hwy so you don't actually see if there are a more cars in a general area or scattered throughout (as this plot suggests). To fix it, we can jitter the plot.
 
     ```{r}
 
+  ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+      geom_point(position = 'jitter')
     ```
 
 2.  What parameters to `geom_jitter()` control the amount of jittering?
 
-    Answer: 
+    Answer: width= and height= controls the amount of horizontal and vertical noise respectively.
 
     ```{r}
-
+  ?geom_jitter
     ```
 
 3.  Compare and contrast `geom_jitter()` with `geom_count()`.
 
-    Answer: 
+    Answer: geom_jitter helps distinguish points that are overplotted by shifting from theiri true value. Geom_count counts points that are in the same location and increases their size so you can see the larger circles at locations where points overlap. This helps distinguish where points are concentrated without losing their true x and y value.
 
     ```{r}
-
+?geom_count
     ```
 
 # Exercise 6
@@ -308,15 +337,17 @@ ggplot(mtcars, aes(wt, mpg)) +
     Answer: 
 
     ```{r}
-
+ggplot(mpg, aes(class)) +
+  geom_bar(aes(fill = drv)) +
+  coord_polar()
     ```
 
 2.  What does `labs()` do? Read the documentation.
 
-    Answer: 
+    Answer: labs() sets axis,legend, title, caption, and subtitle labels in the individual scales. 
 
     ```{r}
-
+?labs()
     ```
 
 3.  What does the plot below tell you about the relationship between city
@@ -330,8 +361,10 @@ ggplot(mtcars, aes(wt, mpg)) +
       coord_fixed()
     ```
 
-    Answer: 
+    Answer: The figure shows as city miles per gallon increases, the highway miles per gallon increases as well.  coord_fixed() ensures the line created by geom_abline() is at a 45 degree angle. This helps the viewer see how the data compares to the line of city mpg vs highway mpg. geom_abline() creates a line on the graph that can be customized. The default uses the x and y variables to plot y=x. Otherwise, you can manually input the function by inputting slope and intercept. 
 
     ```{r}
-
+    ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+      geom_point() + 
+      geom_abline()
     ```
